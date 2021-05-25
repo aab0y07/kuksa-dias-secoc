@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  influxdb: 
+    image: influxdb:1.8.3
+    container_name: influxdb
+    restart: always
+    ports: 
+      - "8086:8086"
+    networks:
+      - monitor_network
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    environment:
+      - INFLUX_DB=${INFLUXDB_DATABASE}
+      - INFLUX_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUX_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+  
+  grafana:
+    image: grafana/grafana:6.0.0
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - monitor_network
+    depends_on:
+      - influxdb
+    environment:
+      - GF_INSTALL_PLUGINS=natel-plotly-panel,vonage-status-panel # to add plugins
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana_config/grafana-provisioning/:/etc/grafana/provisioning/
+
+  connector: 
+    image: aab0y07/hono-influxdb-connector
+    container_name: hono-influxdb-connector
+    command: --server.url=${INFLUXDB_URL} --username=${INFLUXDB_USERNAME} --password=${INFLUXDB_PASSWORD} --database=${INFLUXDB_DATABASE}   
+    restart: always
+    ports: 
+      - "8080:8080"
+    networks:
+      - monitor_network
+    depends_on:
+      - influxdb
+
+networks: 
+    monitor_network:
+    
+volumes:
+    influxdb-storage:
+    grafana-storage:

@@ -1,0 +1,4 @@
+com/bosch/iothub/examples/Application.class
+com/bosch/iothub/examples/AppConfiguration.class
+com/bosch/iothub/examples/ExampleConsumer.class
+com/bosch/iothub/examples/InfluxAPI.class
