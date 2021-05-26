@@ -205,19 +205,122 @@ public class ExampleConsumer {
         System.out.println("Before Write Content: " );
 		//JSONObject rates = jsonObject.getJSONObject("rates");
         //influxAPI.writeMetricDataUnderHost(influxDB, "signalTable", jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString());
-        influxDB.write(Point.measurement("signalTable")
+        
+        influxDB.write(Point.measurement("BarometricPress")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    //.tag("host", host)
-			    .addField("SignalValue", jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString())
+			    .addField("Signal_BarometricPress", jsonObject.get("BarometricPress").toString())
 			    .build());
+        influxDB.write(Point.measurement("MalfunctionIndicatorLampStatus")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_MalfunctionIndicatorLampStatus", jsonObject.get("MalfunctionIndicatorLampStatus").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("AmbientAirTemp")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_AmbientAirTemp", jsonObject.get("AmbientAirTemp").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("Aftrtrtmnt1SCRCtlystIntkGasTemp")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_Aftrtrtmnt1SCRCtlystIntkGasTemp", jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("TimeSinceEngineStart")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_TimeSinceEngineStart", jsonObject.get("TimeSinceEngineStart").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("ActualEngPercentTorque")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_ActualEngPercentTorque", jsonObject.get("ActualEngPercentTorque").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("EngSpeedAtIdlePoint1")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngSpeedAtIdlePoint1", jsonObject.get("EngSpeedAtIdlePoint1").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("Aftrtratment1ExhaustGasMassFlow")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_Aftrtratment1ExhaustGasMassFlow", jsonObject.get("Aftrtratment1ExhaustGasMassFlow").toString())
+			    .build());
+        
+        
+        influxDB.write(Point.measurement("Aftertreatment1OutletNOx")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_Aftertreatment1OutletNOx", jsonObject.get("Aftertreatment1OutletNOx").toString())
+			    .build());
+       
+        
+        influxDB.write(Point.measurement("EngReferenceTorque")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngReferenceTorque", jsonObject.get("EngReferenceTorque").toString())
+			    .build());
+        
+        influxDB.write(Point.measurement("EngPercentLoadAtCurrentSpeed")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngPercentLoadAtCurrentSpeed", jsonObject.get("EngPercentLoadAtCurrentSpeed").toString())
+			    .build());
+        
+        
+        
+        influxDB.write(Point.measurement("EngSpeed")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngSpeed", jsonObject.get("EngSpeed").toString())
+			    .build());
+        
+        
+        
+        
+        influxDB.write(Point.measurement("EngCoolantTemp")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngCoolantTemp", jsonObject.get("EngCoolantTemp").toString())
+			    .build());
+        
+        
+        
+        influxDB.write(Point.measurement("EngSpeedAtPoint2")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_EngSpeedAtPoint2", jsonObject.get("EngSpeedAtPoint2").toString())
+			    .build());
+        
+        
+        
+        influxDB.write(Point.measurement("Aftertreatment1IntakeNOx")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_Aftertreatment1IntakeNOx", jsonObject.get("Aftertreatment1IntakeNOx").toString())
+			    .build());
+        
+        
+        influxDB.write(Point.measurement("NominalFrictionPercentTorque")
+			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
+			    .addField("Signal_NominalFrictionPercentTorque", jsonObject.get("NominalFrictionPercentTorque").toString())
+			    .build());
+        
+        
         System.out.println("After Write Content: " );
         //Thread.sleep(5_000L);
 
         // Query your data using InfluxQL.
         // https://docs.influxdata.com/influxdb/v1.7/query_language/data_exploration/#the-basic-select-statement
-        QueryResult queryResult = influxDB.query(new Query("SELECT * FROM signalTable"));
+        QueryResult queryResult_BarometricPress = influxDB.query(new Query("SELECT * FROM BarometricPress"));
+        QueryResult queryResult_MalfunctionIndicatorLampStatus = influxDB.query(new Query("SELECT * FROM MalfunctionIndicatorLampStatus"));
+        QueryResult queryResult_AmbientAirTemp = influxDB.query(new Query("SELECT * FROM AmbientAirTemp"));
+        QueryResult queryResult_Aftrtrtmnt1SCRCtlystIntkGasTemp = influxDB.query(new Query("SELECT * FROM Aftrtrtmnt1SCRCtlystIntkGasTemp"));
+        QueryResult queryResult_TimeSinceEngineStart = influxDB.query(new Query("SELECT * FROM TimeSinceEngineStart"));
+        QueryResult queryResult_ActualEngPercentTorque = influxDB.query(new Query("SELECT * FROM ActualEngPercentTorque"));
+        QueryResult queryResult_EngSpeedAtIdlePoint1 = influxDB.query(new Query("SELECT * FROM EngSpeedAtIdlePoint1"));
+        QueryResult queryResult_Aftrtratment1ExhaustGasMassFlow = influxDB.query(new Query("SELECT * FROM Aftrtratment1ExhaustGasMassFlow"));
+        QueryResult queryResult_Aftertreatment1OutletNOx = influxDB.query(new Query("SELECT * FROM Aftertreatment1OutletNOx"));
+        QueryResult queryResult_EngReferenceTorque = influxDB.query(new Query("SELECT * FROM EngReferenceTorque"));
+        QueryResult queryResult_EngPercentLoadAtCurrentSpeed = influxDB.query(new Query("SELECT * FROM EngPercentLoadAtCurrentSpeed"));
+        QueryResult queryResult_EngSpeed = influxDB.query(new Query("SELECT * FROM EngSpeed"));
+        QueryResult queryResult_EngCoolantTemp = influxDB.query(new Query("SELECT * FROM EngCoolantTemp"));
+        QueryResult queryResult_EngSpeedAtPoint2 = influxDB.query(new Query("SELECT * FROM EngSpeedAtPoint2"));
+        QueryResult queryResult_Aftertreatment1IntakeNOx = influxDB.query(new Query("SELECT * FROM Aftertreatment1IntakeNOx"));
+        QueryResult queryResult_NominalFrictionPercentTorque = influxDB.query(new Query("SELECT * FROM NominalFrictionPercentTorque"));
 
-        System.out.println("Result of the query: " + queryResult);
+        
         LOG.info("Received message [device: {}, content-type: {}]: {}", deviceId, msg.getContentType(), jsonObject);
         LOG.info("... with application properties: {}", msg.getApplicationProperties());
     }
