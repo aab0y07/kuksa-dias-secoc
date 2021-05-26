@@ -37,7 +37,7 @@ services:
   connector: 
     image: aab0y07/hono-influxdb-connector
     container_name: hono-influxdb-connector
-    command: --server.url=${INFLUXDB_URL} --username=${INFLUXDB_USERNAME} --password=${INFLUXDB_PASSWORD} --database=${INFLUXDB_DATABASE}   
+    command: --server.url=${INFLUXDB_URL} --username=${INFLUXDB_USERNAME} --password=${INFLUXDB_PASSWORD} --database=${INFLUXDB_DATABASE} --hono.client.tlsEnabled=true --hono.client.username=messaging@${HONO_TENANTID} --hono.client.password=${HONO_MESSAGINGPW} --tenant.id=${HONO_TENANTID}
     restart: always
     ports: 
       - "8080:8080"
