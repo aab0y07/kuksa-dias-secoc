@@ -35,8 +35,8 @@ services:
       - ./grafana_config/grafana-provisioning/:/etc/grafana/provisioning/
 
   connector: 
-    image: aab0y07/hono-influxdb-connector
-    container_name: hono-influxdb-connector
+    image: aab0y07/hono-influxdb-connector_5.0
+    container_name: hono-influxdb-connector_5.0
     command: --server.url=${INFLUXDB_URL} --username=${INFLUXDB_USERNAME} --password=${INFLUXDB_PASSWORD} --database=${INFLUXDB_DATABASE}   
     restart: always
     ports: 
