@@ -200,73 +200,73 @@ public class ExampleConsumer {
         final String deviceId = MessageHelper.getDeviceId(msg);
         String content = ((Data) msg.getBody()).getValue().toString();
         JSONObject jsonObject = new JSONObject(content);
-        System.out.println("Before Content: " + jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString());
-        int signal = Integer.valueOf(jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString());
+        System.out.println("Before Content: " + jsonObject.get("IsAftrtrtmnt1SCRCtlystIntkGasTempAuthenticated").toString());
+        int signal = Integer.valueOf(jsonObject.get("IsAftrtrtmnt1SCRCtlystIntkGasTempAuthenticated").toString());
         System.out.println("Before Write Content: " );
 		//JSONObject rates = jsonObject.getJSONObject("rates");
         //influxAPI.writeMetricDataUnderHost(influxDB, "signalTable", jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString());
         
         influxDB.write(Point.measurement("BarometricPress")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_BarometricPress", jsonObject.get("BarometricPress").toString())
+			    .addField("Signal_BarometricPress", jsonObject.get("IsBarometricPressAuthenticated").toString())
 			    .build());
         influxDB.write(Point.measurement("MalfunctionIndicatorLampStatus")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_MalfunctionIndicatorLampStatus", jsonObject.get("MalfunctionIndicatorLampStatus").toString())
+			    .addField("Signal_MalfunctionIndicatorLampStatus", jsonObject.get("IsMalfunctionIndicatorLampStatusAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("AmbientAirTemp")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_AmbientAirTemp", jsonObject.get("AmbientAirTemp").toString())
+			    .addField("Signal_AmbientAirTemp", jsonObject.get("IsAmbientAirTempAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("Aftrtrtmnt1SCRCtlystIntkGasTemp")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_Aftrtrtmnt1SCRCtlystIntkGasTemp", jsonObject.get("Aftrtrtmnt1SCRCtlystIntkGasTemp").toString())
+			    .addField("Signal_Aftrtrtmnt1SCRCtlystIntkGasTemp", jsonObject.get("IsAftrtrtmnt1SCRCtlystIntkGasTempAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("TimeSinceEngineStart")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_TimeSinceEngineStart", jsonObject.get("TimeSinceEngineStart").toString())
+			    .addField("Signal_TimeSinceEngineStart", jsonObject.get("IsTimeSinceEngineStartAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("ActualEngPercentTorque")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_ActualEngPercentTorque", jsonObject.get("ActualEngPercentTorque").toString())
+			    .addField("Signal_ActualEngPercentTorque", jsonObject.get("IsActualEngPercentTorqueAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("EngSpeedAtIdlePoint1")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngSpeedAtIdlePoint1", jsonObject.get("EngSpeedAtIdlePoint1").toString())
+			    .addField("Signal_EngSpeedAtIdlePoint1", jsonObject.get("IsEngSpeedAtIdlePoint1Authenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("Aftrtratment1ExhaustGasMassFlow")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_Aftrtratment1ExhaustGasMassFlow", jsonObject.get("Aftrtratment1ExhaustGasMassFlow").toString())
+			    .addField("Signal_Aftrtratment1ExhaustGasMassFlow", jsonObject.get("IsAftrtratment1ExhaustGasMassFlowAuthenticated").toString())
 			    .build());
         
         
         influxDB.write(Point.measurement("Aftertreatment1OutletNOx")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_Aftertreatment1OutletNOx", jsonObject.get("Aftertreatment1OutletNOx").toString())
+			    .addField("Signal_Aftertreatment1OutletNOx", jsonObject.get("IsAftertreatment1OutletNOxAuthenticated").toString())
 			    .build());
        
         
         influxDB.write(Point.measurement("EngReferenceTorque")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngReferenceTorque", jsonObject.get("EngReferenceTorque").toString())
+			    .addField("Signal_EngReferenceTorque", jsonObject.get("IsEngReferenceTorqueAuthenticated").toString())
 			    .build());
         
         influxDB.write(Point.measurement("EngPercentLoadAtCurrentSpeed")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngPercentLoadAtCurrentSpeed", jsonObject.get("EngPercentLoadAtCurrentSpeed").toString())
+			    .addField("Signal_EngPercentLoadAtCurrentSpeed", jsonObject.get("IsEngPercentLoadAtCurrentSpeedAuthenticated").toString())
 			    .build());
         
         
         
         influxDB.write(Point.measurement("EngSpeed")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngSpeed", jsonObject.get("EngSpeed").toString())
+			    .addField("Signal_EngSpeed", jsonObject.get("IsEngSpeedAuthenticated").toString())
 			    .build());
         
         
@@ -274,27 +274,27 @@ public class ExampleConsumer {
         
         influxDB.write(Point.measurement("EngCoolantTemp")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngCoolantTemp", jsonObject.get("EngCoolantTemp").toString())
+			    .addField("Signal_EngCoolantTemp", jsonObject.get("IsEngCoolantTempAuthenticated").toString())
 			    .build());
         
         
         
         influxDB.write(Point.measurement("EngSpeedAtPoint2")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_EngSpeedAtPoint2", jsonObject.get("EngSpeedAtPoint2").toString())
+			    .addField("Signal_EngSpeedAtPoint2", jsonObject.get("IsEngSpeedAtPoint2Authenticated").toString())
 			    .build());
         
         
         
         influxDB.write(Point.measurement("Aftertreatment1IntakeNOx")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_Aftertreatment1IntakeNOx", jsonObject.get("Aftertreatment1IntakeNOx").toString())
+			    .addField("Signal_Aftertreatment1IntakeNOx", jsonObject.get("IsAftertreatment1IntakeNOxAuthenticated").toString())
 			    .build());
         
         
         influxDB.write(Point.measurement("NominalFrictionPercentTorque")
 			    .time(System.currentTimeMillis() * 1000000, TimeUnit.NANOSECONDS)
-			    .addField("Signal_NominalFrictionPercentTorque", jsonObject.get("NominalFrictionPercentTorque").toString())
+			    .addField("Signal_NominalFrictionPercentTorque", jsonObject.get("IsNominalFrictionPercentTorqueAuthenticated").toString())
 			    .build());
         
         
