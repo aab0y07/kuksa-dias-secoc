@@ -1,0 +1,188 @@
+/*@!Encoding:1252*/
+includes
+{
+ 
+  #pragma library("CAPL_TEST.dll") 
+  #include "ccsecurity_libMod.cin" 
+
+}
+
+variables 
+{
+  byte gBufferGet[10];
+  byte gBufferPut[10] = { 9, 8, 7, 55, 66, 77, 0, 0, 0, 0};
+
+  DWORD gHandle;
+  long par1 = 7;
+  long par2 = 6;
+  long result;
+  byte res[16];
+  int fv = 0; 
+  
+  int index;
+  int mat1[2][2] = {{1,2}, {3,4}};
+  int mat2[3][3] = {{1,2,3}, {4,5,6}, {7,8,9}};
+  byte SKC[16] = {0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
+  //byte SubKey1[16];
+  //byte SubKey2[16];
+  byte SubKey1[16] = {0xfb,0xee,0xd6,0x18,0x35,0x71,0x33,0x66,0x7c,0x85,0xe0,0x8f,0x72,0x36,0xa8,0xde};
+  byte SubKey2[16] = {0xf7,0xdd,0xac,0x30,0x6a,0xe2,0x66,0xcc,0xf9,0x0b,0xc1,0x1e,0xe4,0x6d,0x51,0x3b};
+  
+  byte Mac[16];
+  byte DecMac[16];
+  byte state[16];
+  message 0x100 msg2;
+
+  
+  
+  
+
+}
+
+
+
+  // this message handler write specific signal value from frame to a right window
+  
+void createMessage()
+ {
+    int i;
+    message 0x100 msg1 = {dlc = 8}; // declare message to send
+    msg1.byte(0) = 0x12; // set the data field
+    msg1.long(1) = 0x90785634;
+    msg1.byte(5) = 0xaa;
+    msg1.byte(6) = 0xbb;
+    msg1.byte(7) = 0xcc;
+    
+    for ( i=0; i<16; i++ ) {
+      state[i] =msg1.byte(i);
+      write("0x%x ", state[i]);
+    }
+    
+    //output(msg1); // send the message
+    aes_cmac();
+    for (i=0; i<8; i++ ) {
+     msg1.byte(i)=state[i];
+      //write("0x%x ", state[i]);
+    }
+    output(msg1);
+    
+    //msg1.CarSpeed = 100; // assume CarSpeed occupies the last three bytes
+    //msg1.CAN = 2;
+   
+ }
+  
+  //write("Car Speed = %x ", ABSdata.CarSpeed);
+  //write("Gear Lock = %x ", ABSdata.GearLock);
+  //write("Diagnostics = %x ", ABSdata.Diagnostics);
+
+  
+
+on start
+{
+  int i; 
+  write("-------------------Create dummy message -----------------");
+  createMessage();
+
+  //output(this); 
+  /*
+  write("-------------------Encrypt the message -----------------");
+  aes_cmac();
+  
+  write("-------------------Decrypt the MAC -----------------");
+  
+  aes_decr();
+  for ( i=0; i<16; i++ ) {
+      DecMac[i] =SubKey1[i]^DecMac[i];
+      write("0x%x ", DecMac[i]);
+  }
+  */
+  
+  
+  
+  
+  // in this way it is working fine
+  /*
+  aes_encr();
+  write("-------------------DecMac-----------------"); 
+  aes_decr();
+  */
+  //generatesubKey();
+  
+}
+
+void sum(int matrix[][])
+{
+    int i, j;
+    int answer;
+    answer = 0;
+    for (i = 0; i < elCount(matrix); i++)
+    {
+    for (j = 0; j < elCount(matrix[i]); j++)
+    {
+    answer += matrix[i][j];
+    }
+    }
+    write("The sum is %d", answer);
+}
+
+/*
+on message ABSdata
+{
+  write("engine speed = %d", this.CarSpeed);
+  write("engine temperature = %d.", this.CarSpeed);
+}
+*/
+
+on preStart
+{
+  /* This function will register the CAPLDLL.
+     The handle is important for all function calls.  
+     It will indent the CAPL node in the DLL */   
+
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"");
+  //writeLineEx(1,1,"--------------------- CAPL-DLL Example -----------------------");
+  writeLineEx(1,1,"");
+  //writeLineEx(1,1,"Start procedure:");
+  gHandle = registerCAPLDLL();
+  //writeLineEx(1,1,"1. DLL Registration:   Handle = %d", gHandle);
+}
+
+
+
+
+
+
+
+on key 'x'
+{
+
+  
+  
+
+  //writeLineEx(1,1,"");
+  //writeLineEx(1,1,"");
+  //writeLineEx(1,1,"");
+  //writeLineEx(1,1,"<7> Calculate the value by the DLL");
+  //writeLineEx(1,1,"    The return value is the result!");
+  //writeLineEx(1,1,"--------------------------------------------------------------");
+  //result = dllAdd(par1, par2);  /* This function will add two values. The return value is the result	*/ 
+  //writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 + 6)  Result = %d",result);
+  //sum(mat2);
+  
+  //result = dllSubtract(par1, par2);  /* This function will substract two values. The return value is the result	*/ 
+  //writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 - 6)  Result = %d",result);
+  
+  //res = dllAES_Init(128);
+  //writeLineEx(1,1,"Call dllAES_init  Result = %d",res);
+  
+  
+  //writeLineEx(1,1,"--------------------------------------------------------------"); 
+ 
+ 
+  
+}
+
+

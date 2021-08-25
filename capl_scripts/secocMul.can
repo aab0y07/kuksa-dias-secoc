@@ -1,0 +1,512 @@
+/*@!Encoding:1252*/
+includes
+{
+  // Include encyption library
+  #include "ccsecurity_libMod.cin" 
+  
+
+}
+
+variables
+{
+  // Declare the message to transmit
+  message 0x100 msg1 = {dlc = 8};
+  message 0x100 msg2 = {dlc = 8};
+  message 0x100 msg3 = {dlc = 8};
+
+  
+  msTimer timer1; // define timer1 in milliseconds
+  //msTimer timer2; // define timer1 in milliseconds
+  //msTimer timer3; // define timer1 in milliseconds
+  
+  int i;
+  byte index = 0;
+  
+  // Declaration of freshness value
+  word fv = 0x0000;
+  word truncatedFV; 
+  byte msb1 = 0;
+  
+  byte SKC[16] = {0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
+  //byte SubKey1[16];
+  //byte SubKey2[16];
+  byte SubKey1[16] = {0xfb,0xee,0xd6,0x18,0x35,0x71,0x33,0x66,0x7c,0x85,0xe0,0x8f,0x72,0x36,0xa8,0xde};
+  byte SubKey2[16] = {0xf7,0xdd,0xac,0x30,0x6a,0xe2,0x66,0xcc,0xf9,0x0b,0xc1,0x1e,0xe4,0x6d,0x51,0x3b};
+  
+  byte Mac[16];
+  byte truncatedMac[3];
+  byte val1 = 0xAA;
+  byte val2 = 0xBB;
+  byte val3 = 0xCC;
+  byte val4 = 0xDD;
+  byte state[16];
+  char fvArr[9]; 
+  
+  int j=5;
+
+}
+
+
+/*
+  The method to truncate FV on the CAN frame
+*/
+/*
+void truncateFV(int fv)
+{
+  if (fv)
+}
+*/
+
+
+/*
+  The method to create message to send over the CAN frame
+*/
+
+void createMsg1MSB()
+ {
+    // Set the data field - 4 bytes MSB
+
+    
+    msg1.byte(0) = 0xAA;
+    msg1.byte(1) = 0xBB;
+    msg1.byte(2) = 0xCC;
+    msg1.byte(3) = 0xDD;
+    // Set the FV - 1 byte
+    fv++;
+    msg1.byte(4) = fv;
+    
+ 
+    // ltoa(fv,fvArr,10);
+  
+    // write("FV: %x FvArr= %s", fv, fvArr); 
+  
+    write("Incremented value of FV :  %x ", fv);
+    msg1.byte(5) = createMsg1MSB1(val1, val2, val3, val4, fv);
+    msg1.byte(6) = createMsg1MSB2(val1, val2, val3, val4, fv);
+    msg1.byte(7) = createMsg1MSB3(val1, val2, val3, val4, fv);
+    //msg1.byte(5) = msb1;
+    for (i=0; i<16; i++) {
+      state[i] = 0;
+    }
+   
+}
+
+byte createMsg1MSB1(byte a, byte b, byte c, byte d, word num)
+{
+   
+      
+     state[0] =a;
+      write("value of:  %x ", a);
+      state[1] =b;
+  write("value of:  %x ", b);
+      state[2] =c;
+  write("value of:  %x ", c);
+      state[3] =d;
+  write("value of:  %x ", d);
+      if(num <= 0xFF) 
+      {
+          state[4] = 0x00; 
+          write("value of new1:  %x ", state[4]);
+          state[5] =num;
+          write("value of new1 :  %x ", num);
+      } else 
+      {
+          state[4] = swapInt(num); 
+          write("value of new2:  %x ", state[4]);
+          state[5] =num;
+          write("value of new2 :  %x ", state[5]);
+      }
+
+  
+      aes_cmac(); 
+  
+      write("--------------------Pause1-------------");
+     
+      return state[0]; 
+  
+}
+
+byte createMsg1MSB2(byte a, byte b, byte c, byte d, word num)
+{
+    
+      state[0] =a;
+      write("value of:  %x ", a);
+      state[1] =b;
+  write("value of:  %x ", b);
+      state[2] =c;
+  write("value of:  %x ", c);
+      state[3] =d;
+  write("value of:  %x", d);
+         if(num <= 0xFF) 
+      {
+          state[4] = 0x00; 
+          write("value of new1:  %x ", state[4]);
+          state[5] =num;
+          write("value of new1 :  %x ", num);
+      } else 
+      {
+          state[4] = swapInt(num); 
+          write("value of new2:  %x ", state[4]);
+          state[5] =num;
+          write("value of new2 :  %x ", state[5]);
+      }
+      state[6] =0;
+      state[7] =0;
+      state[8] =0;
+      state[9] =0;
+      state[10] =0;
+      state[11] =0;
+      state[12] =0;
+      state[13] =0;
+      state[14] =0;
+      state[15] =0;
+  
+      aes_cmac(); 
+      write("--------------------Pause2-------------");
+  
+      return state[1]; 
+  
+}
+
+byte createMsg1MSB3(byte a, byte b, byte c, byte d, word num)
+{
+   
+  
+      state[0] =a;
+      state[1] =b;
+      state[2] =c;
+      state[3] =d;
+      if(num <= 0xFF) 
+      {
+          state[4] = 0x00; 
+          write("value of new1:  %x ", state[4]);
+          state[5] =num;
+          write("value of new1 :  %x ", num);
+      } else 
+      {
+          state[4] = swapInt(num); 
+          write("value of new2:  %x ", state[4]);
+          state[5] =num;
+          write("value of new2 :  %x ", state[5]);
+      }
+      state[6] =0;
+      state[7] =0;
+      state[8] =0;
+      state[9] =0;
+      state[10] =0;
+      state[11] =0;
+      state[12] =0;
+      state[13] =0;
+      state[14] =0;
+      state[15] =0;
+  
+      aes_cmac();
+      write("--------------------Pause3-------------");
+  
+      return state[2]; 
+  
+}
+   
+
+ 
+
+/*
+void createMsg2MSB()
+ {
+    // Set the data field - 4 bytes MSB
+    msg2.byte(0) = 0xAB;
+    msg2.byte(1) = 0xBB;
+    msg2.byte(2) = 0xCC;
+    msg2.byte(3) = 0xDD;
+    // Set the FV - 1 byte
+    fv++;
+    msg2.byte(4) = fv;
+    truncateMac2();
+    for ( i=0; i<8; i++ ) {
+      write("MSB 0x%x ", msg2.byte(i));
+    }
+}
+
+void createMsg3MSB()
+ {
+    // Set the data field - 4 bytes MSB
+    msg3.byte(0) = 0xAC;
+    msg3.byte(1) = 0xBB;
+    msg3.byte(2) = 0xCC;
+    msg3.byte(3) = 0xDD;
+    // Set the FV - 1 byte
+    fv++;
+    msg3.byte(4) = fv;
+    truncateMac3();
+    for ( i=0; i<8; i++ ) {
+      write("MSB 0x%x ", msg3.byte(i));
+    }
+}
+*/
+
+
+
+
+/*
+  The method to assign values to the MAC cipher blocks
+*/
+
+/*
+void assignValues1() 
+{
+  // Assign created message to MAC's cipher block
+  
+  for ( i=0; i<5; i++ ) {
+      state[i] =msg1.byte(i);
+      write("Assign 0x%x ", state[i]);
+  }
+}
+
+
+
+void assignValues2() 
+{
+  // Assign created message to MAC's cipher block
+  
+  for ( i=0; i<5; i++ ) {
+      state[i] =msg2.byte(i);
+      write("Assign 0x%x ", state[i]);
+  }
+}
+
+void assignValues3() 
+{
+  // Assign created message to MAC's cipher block
+  
+  for ( i=0; i<5; i++ ) {
+      state[i] =msg3.byte(i);
+      write("Assign 0x%x ", state[i]);
+  }
+}
+*/
+
+/*
+  The method to generate MAC value
+*/
+/*
+void generateMac1() 
+{
+   assignValues1();
+   // Call the method from library to generate MAC  
+   aes_cmac(); 
+}
+
+
+void generateMac2() 
+{
+   assignValues2();
+   // Call the method from library to generate MAC  
+   aes_cmac(); 
+}
+void generateMac3() 
+{
+   assignValues3();
+   // Call the method from library to generate MAC  
+   aes_cmac(); 
+}
+
+*/
+
+/*
+  The method to truncate the MAC 
+*/
+
+
+
+
+void truncateMac1() 
+{
+  
+  //generateMac1();
+  // Set truncated MAC value to array
+  for (i=0; i<3; i++) {
+      msg1.byte(j) = state[i];
+      write(" LSB 0x%x ", msg1.byte(j));
+      j++;
+  }
+   
+
+  
+  /*
+  for (i=0; i<3; i++) {
+    truncatedMac[i] = state[i];
+    write(" Truncation 0x%x ", state[i]);
+  }
+  */
+   
+}
+
+
+
+void truncateMac2() 
+{
+  
+  //generateMac2();
+  // Set truncated MAC value to array
+  
+   
+  for (i=0; i<3; i++) {
+      msg2.byte(j) = state[i];
+      write(" LSB 0x%x ", msg2.byte(j));
+      j++;
+   }
+  
+   
+}
+void truncateMac3() 
+{
+  
+  //generateMac3();
+  // Set truncated MAC value to array
+  
+   
+  for (i=0; i<3; i++) {
+      msg3.byte(j) = state[i];
+      write(" LSB 0x%x ", msg3.byte(j));
+      j++;
+   }
+   
+}
+
+
+
+/*
+  The method to create message to send over the CAN frame
+*/
+
+/*
+void createMessageLSB()
+ {
+   int j=5;
+   for (i=0; i<3; i++) {
+      msg1.byte(j) = truncatedMac[i];
+      write(" LSB 0x%x ", msg1.byte(j));
+      j++;
+   }
+   write("--------------Next round ---------------------"); 
+}
+*/
+
+on start
+{ 
+  
+  
+ 
+  //write("-------------------Create SubKeys First -----------------");
+  //generatesubKey();
+  
+
+  
+  write("Timer has started!"); 
+  setTimer(timer1, 200); // initialize timer to 100 ms
+  write("Timer has ended!"); 
+  
+  /*
+  write("Timer has started!"); 
+  setTimer(timer2, 2000); // initialize timer to 100 ms
+  write("Timer has ended!");
+  
+  write("Timer has started!"); 
+  setTimer(timer3, 3000); // initialize timer to 100 ms
+  write("Timer has ended!");
+  */
+
+  
+}
+
+on timer timer1
+{
+  write("restart the timer!"); 
+  setTimer(timer1,200); // reset the timer
+  
+
+  write("-------------------Create dummy message MSB part -----------------");
+  
+  createMsg1MSB();
+
+  
+
+  output(msg1); // output the message
+  
+  //msg1.byte(0) = msg1.byte(0) + 1; // increment the data
+  //msg1.byte(4) = msg1.byte(4) + 1; // increment FV
+  
+  //write("-------------------Truncate MAC -----------------");
+  //truncateMac();
+  
+  // write("-------------------Create dummy message LSB part -----------------");
+  // createMessageLSB();
+  //output(msg1);
+  /*
+  createMsg2MSB();
+  output(msg2);
+  
+  createMsg3MSB();
+  output(msg3);
+  */
+
+  //msg1.byte(0) = msg1.byte(0) + 1; // increment the data
+  
+ 
+  
+  write("Renew the timer!");
+  
+}
+
+/*
+on timer timer2
+{
+  write("Restart the timer2!"); 
+  setTimer(timer2,2000); // reset the timer
+ 
+  write("-------------------Create dummy message MSB part -----------------");
+  createMsg2MSB();
+  output(msg2);
+  
+  
+  
+}
+
+on timer timer3
+{
+  write("Restart the timer3!"); 
+  setTimer(timer3,3000); // reset the timer
+ 
+  write("-------------------Create dummy message MSB part -----------------");
+  createMsg3MSB();
+  output(msg3);
+  
+  
+  
+}
+*/
+
+/*
+variables
+{
+  message 0x555 msg1 = {dlc = 1};
+  msTimer timer1; // define timer1 in milliseconds
+}
+
+on start
+{
+  write("timer has started!"); 
+  setTimer(timer1, 100); // initialize timer to 100 ms
+  write("timer has ended!"); 
+}
+
+on timer timer1
+{
+  write("restart the timer!"); 
+  setTimer(timer1,1000); // reset the timer
+  msg1.byte(0) = msg1.byte(0) + 1; // increment the data
+  output(msg1); // output the message
+  write("renew the timer!");
+  
+}
+*/
