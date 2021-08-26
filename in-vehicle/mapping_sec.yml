@@ -1,0 +1,179 @@
+# Map OBD values to tree
+
+AmbientAirTemp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.AmbientAirTemp
+  auth_status:
+    - Vehicle.Authentication.IsAmbientAirTempAuthenticated
+    
+     
+Aftrtrtmnt1SCRCtlystIntkGasTemp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.AfterTreatment.Aftrtrtmnt1SCRCtlystIntkGasTemp
+  auth_status:
+    - Vehicle.Authentication.IsAftrtrtmnt1SCRCtlystIntkGasTempAuthenticated
+    
+   
+
+Aftrtratment1ExhaustGasMassFlow:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.AfterTreatment.Aftrtratment1ExhaustGasMassFlow
+  auth_status:
+    - Vehicle.Authentication.IsAftrtratment1ExhaustGasMassFlowAuthenticated
+     
+
+Aftertreatment1IntakeNOx:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.AfterTreatment.NOxLevel.Aftertreatment1IntakeNOx
+  auth_status:
+    - Vehicle.Authentication.IsAftertreatment1IntakeNOxAuthenticated
+    
+ 
+Aftertreatment1OutletNOx:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.AfterTreatment.NOxLevel.Aftertreatment1OutletNOx
+  auth_status:
+    - Vehicle.Authentication.IsAftertreatment1OutletNOxAuthenticated
+
+ 
+TimeSinceEngineStart:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.FuelSystem.TimeSinceEngineStart
+  auth_status:
+    - Vehicle.Authentication.IsTimeSinceEngineStartAuthenticated
+  
+ActualEngPercentTorque:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.ActualEngPercentTorque
+  auth_status:
+    - Vehicle.Authentication.IsActualEngPercentTorqueAuthenticated
+
+  
+EngReferenceTorque:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.EngReferenceTorque
+  auth_status:
+    - Vehicle.Authentication.IsEngReferenceTorqueAuthenticated
+   
+ 
+NominalFrictionPercentTorque:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.NominalFrictionPercentTorque
+  auth_status:
+    - Vehicle.Authentication.IsNominalFrictionPercentTorqueAuthenticated
+   
+   
+EngSpeed:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.EngSpeed
+  auth_status:
+    - Vehicle.Authentication.IsEngSpeedAuthenticated
+    
+        
+EngSpeedAtIdlePoint1:
+  minupdatedelay: 100 
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.EngSpeedAtIdlePoint1
+  auth_status:
+    - Vehicle.Authentication.IsEngSpeedAtIdlePoint1Authenticated
+    
+    
+EngSpeedAtPoint2:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.Drivetrain.InternalCombustionEngine.Engine.EngSpeedAtPoint2
+  auth_status:
+    - Vehicle.Authentication.IsEngSpeedAtPoint2Authenticated
+    
+  
+BarometricPress:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.BarometricPress
+  auth_status:
+    - Vehicle.Authentication.IsBarometricPressAuthenticated
+   
+EngCoolantTemp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.EngCoolantTemp
+  auth_status:
+    - Vehicle.Authentication.IsEngCoolantTempAuthenticated
+   
+EngPercentLoadAtCurrentSpeed:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.EngPercentLoadAtCurrentSpeed
+  auth_status:
+    - Vehicle.Authentication.IsEngPercentLoadAtCurrentSpeedAuthenticated
+
+ProtectLampStatus:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.ProtectLampStatus
+  auth_status:
+    - Vehicle.Authentication.IsProtectLampStatusAuthenticated
+    
+   
+RedStopLampState:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.RedStopLampState
+  auth_status:
+    - Vehicle.Authentication.IsRedStopLampStateAuthenticated
+    
+AmberWarningLampStatus:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.AmberWarningLampStatus
+  auth_status:
+    - Vehicle.Authentication.IsAmberWarningLampStatusAuthenticated
+   
+   
+MalfunctionIndicatorLampStatus:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.MalfunctionIndicatorLampStatus
+  auth_status:
+    - Vehicle.Authentication.IsMalfunctionIndicatorLampStatusAuthenticated
+    
+  
+FlashAmberWarningLamp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.FlashAmberWarningLamp
+  auth_status:
+    - Vehicle.Authentication.IsFlashAmberWarningLampAuthenticated
+    
+   
+FlashMalfuncIndicatorLamp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.FlashMalfuncIndicatorLamp
+  auth_status:
+    - Vehicle.Authentication.IsFlashMalfuncIndicatorLampAuthenticated
+    
+FlashProtectLamp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.FlashProtectLamp
+  auth_status:
+    - Vehicle.Authentication.IsFlashProtectLampAuthenticated
+       
+FlashRedStopLamp:
+  minupdatedelay: 100
+  targets:
+    - Vehicle.OBD.FaultDetectionSystem.FlashRedStopLamp
+  auth_status:
+    - Vehicle.Authentication.IsFlashRedStopLampAuthenticated
+
