@@ -1,443 +1,287 @@
 /*@!Encoding:1252*/
+
+/*
+   @Author: Abdulhay Boydedaev
+
+   This script has been created on the frame of the thesis project: "Data security for cloud based diagnosis"
+  
+   CAPL script to create AUTOSAR SecOC Profile1 based secure CAN frames with extended ID using "ccsecurity_libMod.cin" library: 
+   
+   Secure CAN frame details:
+  
+      CAN Frame Id = 0x100
+      Authentic i-PDU             = Bits: 0-31  (4 bytes)
+      Truncated Freshness value   = Bits: 32-39 (1 byte)
+      Truncated MAC               = Bits: 40-63 (3 bytes)
+      
+      Example of the secure CAN frame: 0x18FF3300 AABBCCDD1025FF46
+  
+*/
+
+
+
 includes
 {
   // Include encyption library
   #include "ccsecurity_libMod.cin" 
-  
-
 }
 
 variables
 {
-  // Declare the message to transmit
-  message 0x100 msg1 = {dlc = 8};
-  message 0x100 msg2 = {dlc = 8};
-  message 0x100 msg3 = {dlc = 8};
   
-  message *Aft1SCR;
-  message *AfInt1NOx;
-  message *AfOut1NOx;
-  dword aft1ScrId;
-  dword afIntId;
-  dword afOutId;
-  
-  msTimer timer1; // define timer1 in milliseconds
-  //msTimer timer2; // define timer1 in milliseconds
-  //msTimer timer3; // define timer1 in milliseconds
-  //msTimer timer2; // define timer1 in milliseconds
-  //msTimer timer3; // define timer1 in milliseconds
-  
-  int i;
-  byte index = 0;
-  
-  // Declaration of freshness value
-  int fv = 0x0000;
+  // Declare the message 
+  message *Msg;
+  dword msg;
+ 
+ 
+  // Declare the timer in milliseconds and timer will be reset every 1 sec
+  msTimer timerSec;
+
+  // Declare and initialize freshness value (2 bytes)
+  word fv = 0x0000;
   word truncatedFV; 
-  byte msb1 = 0;
   
+  // Secret keys to tun the MAC generation algorithm
   byte SKC[16] = {0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
-  //byte SubKey1[16];
-  //byte SubKey2[16];
   byte SubKey1[16] = {0xfb,0xee,0xd6,0x18,0x35,0x71,0x33,0x66,0x7c,0x85,0xe0,0x8f,0x72,0x36,0xa8,0xde};
   byte SubKey2[16] = {0xf7,0xdd,0xac,0x30,0x6a,0xe2,0x66,0xcc,0xf9,0x0b,0xc1,0x1e,0xe4,0x6d,0x51,0x3b};
   
-  byte Mac[16];
-  byte truncatedMac[3];
+  int i;
+  byte index = 0;
   byte val1 = 0xAA;
   byte val2 = 0xBB;
   byte val3 = 0xCC;
   byte val4 = 0xDD;
   byte state[16];
   
-  int j=5;
+  byte Mac[16];
+  byte truncatedMac[3];
+
 
 }
 
 
 /*
-  The method to truncate FV on the CAN frame
+   Method to create secure CAN frame 
 */
-/*
-void truncateFV(int fv)
-{
-  if (fv)
-}
-*/
-
-
-/*
-  The method to create message to send over the CAN frame
-*/
-
-void createMsg1MSB(message *msg)
+void createSecureCanFrame(message *msgIdExt)
  {
-    // Set the data field - 4 bytes MSB
-
+    // Set the input data to transmit between byte postion 0-3 
+    msgIdExt.byte(0) = 0xAA;
+    msgIdExt.byte(1) = 0xBB;
+    msgIdExt.byte(2) = 0xCC;
+    msgIdExt.byte(3) = 0xDD;
     
-    msg.byte(0) = 0xAA;
-    msg.byte(1) = 0xBB;
-    msg.byte(2) = 0xCC;
-    msg.byte(3) = 0xDD;
-    // Set the FV - 1 byte
+    // First increment the FV and then set to byte postion 5
     fv++;
-    msg.byte(4) = fv;
+    msgIdExt.byte(4) = fv;
     write("Incremented value of FV :  %x ", fv);
-    msg.byte(5) = createMsg1MSB1(val1, val2, val3, val4, fv);
-    msg.byte(6) = createMsg1MSB2(val1, val2, val3, val4, fv);
-    msg.byte(7) = createMsg1MSB3(val1, val2, val3, val4, fv);
-    //msg1.byte(5) = msb1;
+    
+    // Set truncated MAC values to byte positions 6-8 
+    msgIdExt.byte(5) = createMsgMSB1(val1, val2, val3, val4, fv);
+    msgIdExt.byte(6) = createMsgMSB2(val1, val2, val3, val4, fv);
+    msgIdExt.byte(7) = createMsgMSB3(val1, val2, val3, val4, fv);
+    
+    // Reset the values
     for (i=0; i<16; i++) {
       state[i] = 0;
     }
-   
-}
-
-byte createMsg1MSB1(byte a, byte b, byte c, byte d, byte e)
-{
-   
-      
-     state[0] =a;
-
-      write("value of:  %x ", a);
-      state[1] =b;
-  write("value of:  %x ", b);
-      state[2] =c;
-  write("value of:  %x ", c);
-      state[3] =d;
-  write("value of:  %x ", d);
-      state[4] =e;
-  write("value of:  %x ", e);
-  
-      aes_cmac(); 
-  
-      write("--------------------Pause1-------------");
-     
-      return state[0]; 
-  
-}
-
-byte createMsg1MSB2(byte a, byte b, byte c, byte d, byte e)
-{
     
-      state[0] =a;
-      write("value of:  %x ", a);
-      state[1] =b;
-  write("value of:  %x ", b);
-      state[2] =c;
-  write("value of:  %x ", c);
-      state[3] =d;
-  write("value of:  %x", d);
-      state[4] =e;
-  write("value of:  %x", e);
-  state[5] =0;
-  state[6] =0;
-  state[7] =0;
-  state[8] =0;
-  state[9] =0;
-  state[10] =0;
-  state[11] =0;
-  state[12] =0;
-  state[13] =0;
-  state[14] =0;
-  state[15] =0;
+   
+}
+
+/*
+   Method to retrieve truncated MAC MSB value at byte position 6
+*/
+byte createMsgMSB1(byte a, byte b, byte c, byte d, word e)
+{
+    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
+    state[0] =a;
+    write("value of:  %x ", a);
+    state[1] =b;
+    write("value of:  %x ", b);
+    state[2] =c;
+    write("value of:  %x ", c);
+    state[3] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+    if(e <= 0xFF) 
+    {
+        state[4] = 0x00; 
+        write("Value of CFV1:  %x ", state[4]);
+        state[5] =e;
+        write("Value of CFV1 :  %x ", e);
+    } 
+    else 
+    {
+        state[4] = swapInt(e); 
+        write("Value of CFV2:  %x ", state[4]);
+        state[5] =e;
+        write("Value of CFV2 :  %x ", state[5]);
+    }
+
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac(); 
   
-      aes_cmac(); 
-      write("--------------------Pause2-------------");
-  
-      return state[1]; 
+    write("-------------------- Get MAC value at byte postion 0 -------------");
+    
+    // Return generated MAC value at byte position 0 
+    return state[0];
+    
+}
+
+/*
+   Method to retrieve truncated MAC MSB value at byte position 7
+*/
+byte createMsgMSB2(byte a, byte b, byte c, byte d, word e)
+{
+    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
+    state[0] =a;
+    write("value of:  %x ", a);
+    state[1] =b;
+    write("value of:  %x ", b);
+    state[2] =c;
+    write("value of:  %x ", c);
+    state[3] =d;
+    write("value of:  %x", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+    if(e <= 0xFF) 
+    {
+        state[4] = 0x00; 
+        write("Value of CFV1:  %x ", state[4]);
+        state[5] =e;
+        write("Value of CFV1 :  %x ", e);
+    } 
+    else 
+    {
+        state[4] = swapInt(e); 
+        write("Value of CFV2:  %x ", state[4]);
+        state[5] =e;
+        write("Value of CFV2 :  %x ", state[5]);
+    }
+    // Reset the rest of the values 
+    state[6] =0;
+    state[7] =0;
+    state[8] =0;
+    state[9] =0;
+    state[10] =0;
+    state[11] =0;
+    state[12] =0;
+    state[13] =0;
+    state[14] =0;
+    state[15] =0;
+    
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac();
+      
+    write("--------------------Get MAC value at byte postion 1-------------");
+    
+    // Return generated MAC value at byte position 1 
+    return state[1]; 
   
 }
 
-byte createMsg1MSB3(byte a, byte b, byte c, byte d, byte e)
+/*
+   Method to retrieve truncated MAC MSB value at byte position 8
+*/
+byte createMsgMSB3(byte a, byte b, byte c, byte d, word e)
 {
    
+    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
+    state[0] =a;
+    state[1] =b;
+    state[2] =c;
+    state[3] =d;
   
-      state[0] =a;
-      state[1] =b;
-      state[2] =c;
-      state[3] =d;
-      state[4] =e;
-      state[5] =0;
-      state[6] =0;
-      state[7] =0;
-      state[8] =0;
-      state[9] =0;
-      state[10] =0;
-      state[11] =0;
-      state[12] =0;
-      state[13] =0;
-      state[14] =0;
-      state[15] =0;
-  
-      aes_cmac();
-      write("--------------------Pause3-------------");
-  
-      return state[2]; 
-  
-}
-   
-
- 
-
-/*
-void createMsg2MSB()
- {
-    // Set the data field - 4 bytes MSB
-    msg2.byte(0) = 0xAB;
-    msg2.byte(1) = 0xBB;
-    msg2.byte(2) = 0xCC;
-    msg2.byte(3) = 0xDD;
-    // Set the FV - 1 byte
-    fv++;
-    msg2.byte(4) = fv;
-    truncateMac2();
-    for ( i=0; i<8; i++ ) {
-      write("MSB 0x%x ", msg2.byte(i));
+    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+    if(e <= 0xFF) 
+    {
+        state[4] = 0x00; 
+        write("value of new1:  %x ", state[4]);
+        state[5] =e;
+        write("value of new1 :  %x ", e);
+    } 
+    else 
+    {
+        state[4] = swapInt(e); 
+        write("value of new2:  %x ", state[4]);
+        state[5] =e;
+        write("value of new2 :  %x ", state[5]);
     }
-}
-
-void createMsg3MSB()
- {
-    // Set the data field - 4 bytes MSB
-    msg3.byte(0) = 0xAC;
-    msg3.byte(1) = 0xBB;
-    msg3.byte(2) = 0xCC;
-    msg3.byte(3) = 0xDD;
-    // Set the FV - 1 byte
-    fv++;
-    msg3.byte(4) = fv;
-    truncateMac3();
-    for ( i=0; i<8; i++ ) {
-      write("MSB 0x%x ", msg3.byte(i));
-    }
-}
-*/
-
-
-
-
-/*
-  The method to assign values to the MAC cipher blocks
-*/
-
-/*
-void assignValues1() 
-{
-  // Assign created message to MAC's cipher block
+    // Reset the rest of the values 
+    state[6] =0;
+    state[7] =0;
+    state[8] =0;
+    state[9] =0;
+    state[10] =0;
+    state[11] =0;
+    state[12] =0;
+    state[13] =0;
+    state[14] =0;
+    state[15] =0;
+    
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac();
+    write("--------------------Get MAC value at byte postion 2-------------");
+    
+    // Return generated MAC value at byte position 2 
+    return state[2]; 
   
-  for ( i=0; i<5; i++ ) {
-      state[i] =msg1.byte(i);
-      write("Assign 0x%x ", state[i]);
-  }
 }
-
-
-
-void assignValues2() 
-{
-  // Assign created message to MAC's cipher block
-  
-  for ( i=0; i<5; i++ ) {
-      state[i] =msg2.byte(i);
-      write("Assign 0x%x ", state[i]);
-  }
-}
-
-void assignValues3() 
-{
-  // Assign created message to MAC's cipher block
-  
-  for ( i=0; i<5; i++ ) {
-      state[i] =msg3.byte(i);
-      write("Assign 0x%x ", state[i]);
-  }
-}
-*/
 
 /*
-  The method to generate MAC value
-*/
-/*
-void generateMac1() 
-{
-   assignValues1();
-   // Call the method from library to generate MAC  
-   aes_cmac(); 
-}
-
-
-void generateMac2() 
-{
-   assignValues2();
-   // Call the method from library to generate MAC  
-   aes_cmac(); 
-}
-void generateMac3() 
-{
-   assignValues3();
-   // Call the method from library to generate MAC  
-   aes_cmac(); 
-}
-
-*/
-
-/*
-  The method to truncate the MAC 
-*/
-
-
-
-
-
-/*
-  The method to create message to send over the CAN frame
-*/
-
-/*
-void createMessageLSB()
- {
-   int j=5;
-   for (i=0; i<3; i++) {
-      msg1.byte(j) = truncatedMac[i];
-      write(" LSB 0x%x ", msg1.byte(j));
-      j++;
-   }
-   write("--------------Next round ---------------------"); 
-}
+   Event procedure to start the measurement 
 */
 
 on start
 { 
   
   
- 
   //write("-------------------Create SubKeys First -----------------");
   //generatesubKey();
-  write("Timer1 has started!"); 
-  setTimer(timer1, 100); // initialize timer to 100 ms
-  write("Timer1 has ended!");
-  aft1ScrId = mkExtId(0x14fd3efe);
-  Aft1SCR.id = aft1ScrId;
-  Aft1SCR.dlc = 8;
   
-  //write("Timer2 has started!"); 
-  //setTimer(timer2, 200); // initialize timer to 100 ms
-  //write("Timer2 has ended!");
-  afIntId = mkExtId(0x18f00f52);
-  AfInt1NOx.id = afIntId;
-  AfInt1NOx.dlc = 8;
   
-  //write("Timer3 has started!"); 
-  //setTimer(timer3, 300); // initialize timer to 100 ms
-  //write("Timer3 has ended!");
-  afOutId = mkExtId(0x18f00e51);
-  AfOut1NOx.id = afOutId;
-  AfOut1NOx.dlc = 8;
+  write("Timer has started!"); 
+  setTimer(timerSec, 1000); // initialize timer to 1000 ms
+  write("Timer has ended!");
+  // Method to create extended Id (29 bit)
+  msg = mkExtId(0x18FF3300);
+  Msg.id = msg;
+  Msg.dlc = 8;
+  
 
-  
-  
+
 }
 
-on timer timer1
-{
-  write("restart the timer1!"); 
-  setTimer(timer1,300); // reset the timer
-  
-
-  write("-------------------Create dummy message MSB part -----------------");
-  
-  createMsg1MSB(Aft1SCR);
-
-  
-
-  output(Aft1SCR); // output the message
-  
-  createMsg1MSB(AfInt1NOx);
-
-  
-
-  output(AfInt1NOx); // output the message
-  
-   createMsg1MSB(AfOut1NOx);
-
-  
-
-  output(AfOut1NOx); // output the message
-  
-  
-  
-  write("Renew the timer1!");
-  
-}
-
-/*
-on timer timer2
-{
-  write("Restart the timer2!"); 
-  setTimer(timer2,100); // reset the timer
-  
-
-  write("-------------------Create dummy message MSB part -----------------");
-  
-  createMsg1MSB(AfInt1NOx);
-
-  
-
-  output(AfInt1NOx); // output the message
-  
-  
-  
-  write("Renew the timer2!");
-  
-  
-  
-}
-
-on timer timer3
-{
-  write("Restart the timer3!"); 
-  setTimer(timer3,100); // reset the timer
-  
-
-  write("-------------------Create dummy message MSB part -----------------");
-  
-  createMsg1MSB(AfOut1NOx);
-
-  
-
-  output(AfOut1NOx); // output the message
-  
-  
-  
-  write("Renew the timer3!");
-  
-  
-  
-}
-
-*/
-
-/*
-variables
-{
-  message 0x555 msg1 = {dlc = 1};
-  msTimer timer1; // define timer1 in milliseconds
-}
-
-on start
-{
-  write("timer has started!"); 
-  setTimer(timer1, 100); // initialize timer to 100 ms
-  write("timer has ended!"); 
-}
-
-on timer timer1
+on timer timerSec
 {
   write("restart the timer!"); 
-  setTimer(timer1,1000); // reset the timer
-  msg1.byte(0) = msg1.byte(0) + 1; // increment the data
-  output(msg1); // output the message
-  write("renew the timer!");
+  setTimer(timerSec,1000); // reset the timer
+  
+
+  write("-------------------Create message MSB part -----------------");
+  
+  // Method to generate secure CAN frame 
+  createSecureCanFrame(Msg);
+
+  // Output the message
+  output(Msg); 
+  
+  //msg.byte(0) = msg1.byte(0) + 1; // increment the data
+  //msg.byte(4) = msg1.byte(4) + 1; // increment FV
+  
+  //output(msg1);
+
+  //msg.byte(0) = msg1.byte(0) + 1; // increment the data
+   
+  write("Reset the timer!");
   
 }
-*/
+
+
+
+
+
+
