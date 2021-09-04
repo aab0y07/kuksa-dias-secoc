@@ -1,0 +1,325 @@
+/*@!Encoding:1252*/
+
+/*
+   @Author: Abdulhay Boydedaev
+
+   This script has been created on the frame of the thesis project: "Data security for cloud based diagnosis"
+  
+   CAPL script to create AUTOSAR SecOC Profile1 based secure CAN frames with extended ID proposed for KUKSA environment using "ccsecurity_libMod.cin" library: 
+   
+   CAN Frame Details:
+      Can Frame Id: 0x18FF3300
+      Repetition rate: 1 Sec
+      Signal Information:
+      Bits : 0 - 15   : Aftertreatment 1 Intake NOx; Resolution: 0.05 ppm/bit, -200 ppm offset; Data Range: -200 to 3012.75 ppm
+      Bits : 16 - 31 : Aftertreatment 1 Outlet NOx; Resolution: 0.05 ppm/bit, -200 ppm offset; Data Range: -200 to 3012.75 ppm
+      Bits : 32 - 39 : Truncated FV as per Autosar SecOC Profile 1
+      Bits : 40 - 63 : Truncated MAC as per Autosar SecOC Profile 1
+       
+   SecOC Details:
+      Data Id: 0x0001
+      Freshness Value: It shall be an up running counter of size 2 bytes (16 Bits)
+      FVM shall be implemented at Sender (ECU) / Receiver (KUKSA) as per Autosar SecOC FVM example for counter
+      MAC : Shall be calculated as per Autosar standards (NIST SP 800 - 38B)
+
+      
+      Example of the secure CAN frame: 0x18FF3300 AABBCCDD1025FF46
+  
+*/
+
+
+
+includes
+{
+  // Include encyption library
+  #include "ccsecurity_libMod.cin" 
+}
+
+variables
+{
+  
+  // Declare the message 
+  message *Msg;
+  dword msg;
+ 
+ 
+  // Declare the timer in milliseconds and timer will be reset every 1 sec
+  msTimer timerSec;
+
+  // Declare and initialize freshness value (4 bytes)
+  word fv = 0x0000;
+  word truncatedFV; 
+  
+  // Secret keys to tun the MAC generation algorithm
+  byte SKC[16] = {0x2b,0x7e,0x15,0x16,0x28,0xae,0xd2,0xa6,0xab,0xf7,0x15,0x88,0x09,0xcf,0x4f,0x3c};
+  byte SubKey1[16] = {0xfb,0xee,0xd6,0x18,0x35,0x71,0x33,0x66,0x7c,0x85,0xe0,0x8f,0x72,0x36,0xa8,0xde};
+  byte SubKey2[16] = {0xf7,0xdd,0xac,0x30,0x6a,0xe2,0x66,0xcc,0xf9,0x0b,0xc1,0x1e,0xe4,0x6d,0x51,0x3b};
+  
+  int i;
+  byte index = 0;
+  byte val1 = 0xAA;
+  byte val2 = 0xBB;
+  byte val3 = 0xCC;
+  byte val4 = 0xDD;
+  byte state[16];
+  
+  byte Mac[16];
+  byte truncatedMac[3];
+
+
+}
+
+
+/*
+   Method to create secure CAN frame 
+*/
+void createSecureCanFrame(message *msgIdExt)
+ {
+    // Set the input data to transmit between byte postion 0-3 
+    msgIdExt.byte(0) = 0xAA;
+    msgIdExt.byte(1) = 0xBB;
+    msgIdExt.byte(2) = 0xCC;
+    msgIdExt.byte(3) = 0xDD;
+    
+    // First increment the FV and then set to byte postion 5
+    fv++;
+    msgIdExt.byte(4) = fv;
+    write("Incremented value of FV :  %x ", fv);
+    
+    // Set truncated MAC values to byte positions 6-8 
+    msgIdExt.byte(5) = createMsgMSB1(val1, val2, val3, val4, fv);
+    msgIdExt.byte(6) = createMsgMSB2(val1, val2, val3, val4, fv);
+    msgIdExt.byte(7) = createMsgMSB3(val1, val2, val3, val4, fv);
+    
+    // Reset the values
+    for (i=0; i<16; i++) {
+      state[i] = 0;
+    }
+    
+   
+}
+
+/*
+   Method to retrieve truncated MAC MSB value at byte position 6
+*/
+byte createMsgMSB1(byte a, byte b, byte c, byte d, word e)
+{
+    // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
+    
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
+    write("value of:  %x ", a);
+    state[3] =b;
+    write("value of:  %x ", b);
+    state[4] =c;
+    write("value of:  %x ", c);
+    state[5] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
+    if(e <= 0xFF) 
+    {
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
+    } 
+    else 
+    {
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
+    }
+
+
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac(); 
+  
+    write("-------------------- Get MAC value at byte postion 0 -------------");
+    
+    // Return generated MAC value at byte position 0 
+    return state[0];
+    
+}
+
+/*
+   Method to retrieve truncated MAC MSB value at byte position 7
+*/
+byte createMsgMSB2(byte a, byte b, byte c, byte d, word e)
+{
+      // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
+    
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
+    write("value of:  %x ", a);
+    state[3] =b;
+    write("value of:  %x ", b);
+    state[4] =c;
+    write("value of:  %x ", c);
+    state[5] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
+    if(e <= 0xFF) 
+    {
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
+    } 
+    else 
+    {
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
+    }
+
+
+    // Calculate MAC value of the base of AES-128 algorithm
+    state[8] =0;
+    state[9] =0;
+    state[10] =0;
+    state[11] =0;
+    state[12] =0;
+    state[13] =0;
+    state[14] =0;
+    state[15] =0;
+    
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac();
+      
+    write("--------------------Get MAC value at byte postion 1-------------");
+    
+    // Return generated MAC value at byte position 1 
+    return state[1]; 
+  
+}
+
+/*
+   Method to retrieve truncated MAC MSB value at byte position 8
+*/
+byte createMsgMSB3(byte a, byte b, byte c, byte d, word e)
+{
+   
+     // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
+    
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
+    write("value of:  %x ", a);
+    state[3] =b;
+    write("value of:  %x ", b);
+    state[4] =c;
+    write("value of:  %x ", c);
+    state[5] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
+    if(e <= 0xFF) 
+    {
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
+    } 
+    else 
+    {
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
+    }
+
+
+    // Calculate MAC value of the base of AES-128 algorithm
+    state[8] =0;
+    state[9] =0;
+    state[10] =0;
+    state[11] =0;
+    state[12] =0;
+    state[13] =0;
+    state[14] =0;
+    state[15] =0;
+    
+    // Calculate MAC value of the base of AES-128 algorithm
+    aes_cmac();
+    write("--------------------Get MAC value at byte postion 2-------------");
+    
+    // Return generated MAC value at byte position 2 
+    return state[2]; 
+  
+}
+
+/*
+   Event procedure to start the measurement 
+*/
+
+on start
+{ 
+  
+  
+  //write("-------------------Create SubKeys First -----------------");
+  //generatesubKey();
+  
+  
+  write("Timer has started!"); 
+  setTimer(timerSec, 1000); // initialize timer to 1000 ms
+  write("Timer has ended!");
+  // Method to create extended Id (29 bit)
+  msg = mkExtId(0x18FF3300);
+  Msg.id = msg;
+  Msg.dlc = 8;
+  
+
+
+}
+
+on timer timerSec
+{
+  write("restart the timer!"); 
+  setTimer(timerSec,1000); // reset the timer
+  
+
+  write("-------------------Create message MSB part -----------------");
+  
+  // Method to generate secure CAN frame 
+  createSecureCanFrame(Msg);
+
+  // Output the message
+  output(Msg); 
+  
+  //msg.byte(0) = msg1.byte(0) + 1; // increment the data
+  //msg.byte(4) = msg1.byte(4) + 1; // increment FV
+  
+  //output(msg1);
+
+  //msg.byte(0) = msg1.byte(0) + 1; // increment the data
+   
+  write("Reset the timer!");
+  
+}
+
+
+
+
+
+
