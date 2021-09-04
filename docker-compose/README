@@ -1,0 +1,1 @@
+Docker Compose contains 3 components: InfluxDB, Granfana and Hono-InfluxDB-Connectorfor and used to create reporting tool 
