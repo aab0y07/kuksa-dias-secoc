@@ -1,2 +1,2 @@
 These CAPL scripts is to implement AUTOSAR SecOC based secure CAN frames. 
-
+CAPL scripts are not functional without integration of "ccsecurity_lib.cin" library
