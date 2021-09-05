@@ -1,15 +1,10 @@
 """
 
-This script is to authenticate CAN messages on the base of Autosar SecOC module
+        @ Author: Abdlhay Boydedaev
+	
+        This script is created on the frame of the thesis workl: "Data security for cloud based diagnosis"
 
-        hexSecKey = "2b7e151628aed2a6abf7158809cf4f3c"
-        secret= bytearray.fromhex(hexSecKey)
-        cobj = CMAC.new(secret, ciphermod=AES)
-        hexMes = "aabbccdd010000000000000000000000"
-        byteMes= bytearray.fromhex(hexMes)
-        cobj.update(byteMes)
-
-        print (cobj.hexdigest())
+        This script maps found signals puts signal authentication status to queue 
 
 
 """
@@ -34,12 +29,10 @@ from Cryptodome.Cipher import AES
 
 
 class AutosarSec:
-    freshness_counter = 0x0000
-    def __init__(self, cfg, secret_key, rxqueue, mapper):
+    def __init__(self, cfg, rxqueue, mapper):
         self.queue = rxqueue
         self.cfg = cfg
         self.mapper = mapper
-        self.secret_key=secret_key
         self.message = ''
         self.db = cantools.database.load_file(cfg['vss.dbcfile'])
         self.canidwl = self.get_whitelist()
@@ -53,11 +46,11 @@ class AutosarSec:
     
     def start_listening(self):
         #print("Open CAN device {}".format(self.cfg['can.port']))
-        print("Before initialize bus")
+        print("Initialize bus")
         self.bus = can.interface.Bus('vcan0', bustype='socketcan')
         rxThread = threading.Thread(target=self.rxWorker)
         rxThread.start()
-        print("thread has started")
+        print("Thread has started")
     
     def rxWorker(self):
         calculated_mac = ''
@@ -73,16 +66,14 @@ class AutosarSec:
                     if self.mapper.minUpdateTimeElapsed(k, rxTime):
                         self.queue.put((k,v))
             '''
-            print('Before:')    
+              
             can_data = msg.__str__()
-            print('After:', str(can_data))  
-            #call here autosarsecoc instance
-            print('Before autosar:')  
+            print('CAN data in string:', str(can_data))  
+            # Autosarsecoc instance
             autosar = secoc_verification.SecocVerification(can_data)
-            print('After autosar:', str(autosar))  
-            print('Before auth:')  
+            print('Autosar:', str(autosar))  
             auth_status = autosar.authentication_status()
-            print('After auth status:', str(auth_status))  
+            print('Authentication status:', str(auth_status))  
             #rxTime=time.time()
             for key, value in self.canidwl.items():
                 print('Received values: {}, {}'.format(key, str(value)))

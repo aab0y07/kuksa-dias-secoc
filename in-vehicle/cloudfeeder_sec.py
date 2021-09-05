@@ -1,15 +1,12 @@
 """
-This script is to collect the required data from the in-vehicle server, `kuksa-val-server`, 
-pre-process them, and transmit the result to the DIAS-KUKSA cloud.
+        @ Author: Abdlhay Boydedaev
+	
+        This script is created on the frame of the thesis workl: "Data security for cloud based diagnosis"
+        
+        This script is created on the base of the "cloudfeeder.py" and collects  
+        required data from the in-vehicle server, `kuksa-val-server`, 
+        and then transmit the result to the DIAS-KUKSA cloud.
 
-The script needs to be located in the same directory where testclient.py 
-is also located: ~/kuksa.val/vss-testclient/
-
-Prior to running this script, the following lines should be added to 
-testclient.py:
-# At the end of - 'def do_getValue(self, args)'
-datastore = json.loads(resp)
-return datastore
 
 """
 
@@ -114,67 +111,7 @@ def send_telemetry(host, port, comb, telemetry_queue):
     else:
         telemetry_queue.append(comb)
         print("# The current telemetry collected, Queue Length: " + str(len(telemetry_queue)))
-'''
-def load_data(binPro, queue):
-    try:
-        f = open("saved_dict.json", "r")
-        binPro.dashboard = json.load(f)
-        print("Saved dictionary file successfully loaded :)")
-    except FileNotFoundError:
-        print("Saved dictionary file not found :(")
-    except IOError:
-        print("Saved dictionary file not found :(")
-    try:
-        f = open("saved_samp.json", "r")
-        samp = json.load(f)
-        binPro.ctr_total = samp["ctr_total"]
-        binPro.ctr_tscr_bad = samp["ctr_tscr_bad"]
-        binPro.ctr_tscr_intermediate = samp["ctr_tscr_intermediate"]
-        binPro.ctr_tscr_good = samp["ctr_tscr_good"]
-        binPro.ctr_old_good = samp["ctr_old_good"]
-        binPro.ctr_pems_cold = samp["ctr_pems_cold"]
-        binPro.ctr_pems_hot = samp["ctr_pems_hot"]
-        print("Saved sampling time file successfully loaded :)")
-    except FileNotFoundError:
-        print("Saved sampling time file not found :(")
-    except IOError:
-        print("Saved sampling time file not found :(")
-    try:
-        f = open("saved_queue.json", "r")
-        queue = json.load(f)
-        print("Saved telemetry queue file successfully loaded :)")
-    except FileNotFoundError:
-        print("Saved telemetry queue file not found :(")
-        print("Starting from scratch.")
-    except IOError:
-        print("Saved telemetry queue file not found :(")
-        print("Starting from scratch.")
-    return queue
 
-def save_data(binPro, queue):
-    saved_dict = json.dumps(binPro.dashboard)
-    f = open("saved_dict.json", "w")
-    f.write(saved_dict)
-    f.close()
-    # Saving sampling times
-    saved_samp = {
-        "ctr_total": binPro.ctr_total,
-        "ctr_tscr_bad": binPro.ctr_tscr_bad,
-        "ctr_tscr_intermediate": binPro.ctr_tscr_intermediate,
-        "ctr_tscr_good": binPro.ctr_tscr_good,
-        "ctr_old_good": binPro.ctr_old_good,
-        "ctr_pems_cold": binPro.ctr_pems_cold,
-        "ctr_pems_hot": binPro.ctr_pems_hot
-    }
-    saved_samp = json.dumps(saved_samp)
-    f = open("saved_samp.json", "w")
-    f.write(saved_samp)
-    f.close()
-    saved_queue = json.dumps(queue)
-    f = open("saved_queue.json", "w")
-    f.write(saved_queue)
-    f.close()
-'''
 print("kuksa.val cloud example feeder")
 
 # Get the pre-fix command for publishing data
@@ -230,21 +167,6 @@ while True:
     # Fresh target
     
 
-        
-    '''
-    # Only sample data when ActualEngPercentTorque is bigger than NominalFrictionPercentTorque
-    if binPro.signals["ActualEngPercentTorque"] > binPro.signals["NominalFrictionPercentTorque"]:
-        # 4. Show collected signal values
-        preprocessor_bosch.printSignalValues(binPro)
-        
-        # A. Proceed to sample data if the aftertreatment system is ready
-        if binPro.signals["Aftertreatment1IntakeNOx"] != 3012.75 and binPro.signals["Aftertreatment1OutletNOx"] != 3012.75:
-            
-            # 5. Preprocess the data set
-            tel_dict = preprocessor_bosch.preprocessing(binPro)
-            preprocessor_bosch.printTelemetry(tel_dict)
-            print("")
-    '''
     # 6. Format telemetry
     tel_json = json.dumps(kuksa_val_dict)
     # Sending device data via Mosquitto_pub (MQTT - Device to Cloud)

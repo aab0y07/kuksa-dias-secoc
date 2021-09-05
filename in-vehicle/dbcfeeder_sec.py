@@ -144,24 +144,13 @@ mapping = dbc2vssmapper.mapper(cfg['vss.mapping'])
 vss = websocketconnector.vssclient(cfg['vss.server'], token)
 can_auth_queue = queue.Queue()
 
-if cfg['can.j1939']:
-    j1939R = j1939reader.J1939Reader(cfg,can_auth_queue,mapping)
 
-    if cfg['can.port'] == 'elmcan':
-        print("Using elmcan. Trying to set up elm2can bridge")
-        elmbr=elm2canbridge.elm2canbridge(cfg, j1939R.canidwl)
-
-    j1939R.start_listening()
-
-else:
-    key = "2b7e151628aed2a6abf7158809cf4f3c"  
-    print(len(key))
-    # Create AutosarSecOC instance
-    secoc = autosar_sec.AutosarSec(cfg,key,can_auth_queue,mapping)
-    #if cfg['can.port'] == 'elmcan':
-        #print("Using elmcan. Trying to set up elm2can bridge")
-        #elmbr=elm2canbridge.elm2canbridge(cfg, secoc.canidwl)
-    secoc.start_listening()
+# Create AutosarSecOC instance
+secoc = autosar_sec.AutosarSec(cfg,can_auth_queue,mapping)
+#if cfg['can.port'] == 'elmcan':
+#print("Using elmcan. Trying to set up elm2can bridge")
+#elmbr=elm2canbridge.elm2canbridge(cfg, secoc.canidwl)
+secoc.start_listening()
    
 
 while True:

@@ -1,16 +1,14 @@
 """
 
-This script is to authenticate CAN messages on the base of Autosar SecOC module
+	@ Author: Abdlhay Boydedaev
+	
+	This script is created on the frame of the thesis workl: "Data security for cloud based diagnosis"
+	
+	This script is to verify secure CAN messages created on the base of Autosar SecOC Profile1 using PyCryptodome library
+	In case of successful verification, found signal authentication status will be set to "1", 
+	ottherwise signal will be considered as tampered and respectively authentication status will be set to "0" 
 
-        hexSecKey = "2b7e151628aed2a6abf7158809cf4f3c"
-        secret= bytearray.fromhex(hexSecKey)
-        cobj = CMAC.new(secret, ciphermod=AES)
-        hexMes = "aabbccdd010000000000000000000000"
-        byteMes= bytearray.fromhex(hexMes)
-        cobj.update(byteMes)
-
-        print (cobj.hexdigest())
-
+	
 
 """
 
@@ -28,8 +26,6 @@ from Cryptodome.Hash import CMAC
 from Cryptodome.Cipher import AES
 
 # alternative to check "from cryptography.fernet import Fernet"
-
-
 
 
 class SecocVerification:
@@ -65,7 +61,7 @@ class SecocVerification:
 		can_id = self.get_frame_id()
 		# Compare transmitted and calculated MAC values
 		if calculated_mac_val == transmitted_mac_val:
-			CmacAes128.freshness_counter += 1
+			SecocVerification.freshness_counter += 1
 			print('Incremented FV value: ' , self.freshness_counter)
 			print('MAC value has been verified successfully!')
 			auth_dict[can_id] = 1     
@@ -77,26 +73,23 @@ class SecocVerification:
         
         
 	def calculate_complete_freshness(self, can_frame):
-        #for element in arr:
         # Get access to array element's 5th byte
 		counter_to_convert = can_frame[10:12]
-		print('Before: ', counter_to_convert)
+		print('Truncated FV before verification: ', counter_to_convert)
 		a = int(counter_to_convert,16)
 		truncated_counter = hex(a)
-        #print('After: ', str(truncated_counter))
-        #print('Truncated counter: ', truncated_counter)
 		pi_counter_lsb = hex((self.freshness_counter&(0xFF<<(8*0)))>>(8*0))[2:]
 		print('Pi counter LSB: ', pi_counter_lsb)
 		pi_counter_msb = hex((self.freshness_counter&(0xFF<<(8*1)))>>(8*1))[2:]
 		print('Pi counter MSB:', str(pi_counter_msb))
-		print("Value of Tc: ", str(truncated_counter))
-		print("Type of Fc: ", type(self.freshness_counter))
-		if truncated_counter > hex(self.freshness_counter):
-            # Need to be clarified, especially byte order does not work yet
+		print("Value of TC: ", str(truncated_counter))
+		print("Type of FV: ", type(self.freshness_counter))
+		if a > int(pi_counter_lsb, 16):
+		# Need to be clarified, especially byte order does not work yet
 			complete_counter_1 = "0x" + pi_counter_msb + truncated_counter[2:] 
 			a = int(complete_counter_1,16)
 			hex_n = "{0:#0{1}x}".format(a,6)
-			print('Complete counter if:', hex_n)
+			print('Complete counter with if-case:', hex_n)
 		else:
 			temp_counter_val = "0x" + pi_counter_msb
 			a = int(temp_counter_val,16) + 0x1
@@ -105,7 +98,7 @@ class SecocVerification:
             
 			a = int(complete_counter_2,16)
 			hex_n = "{0:#0{1}x}".format(a,6)
-			print('Complete counter else:', hex_n)
+			print('Complete counter with else-case:', hex_n)
 		return hex_n
             
 
