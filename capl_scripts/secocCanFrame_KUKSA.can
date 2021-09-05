@@ -5,14 +5,23 @@
 
    This script has been created on the frame of the thesis project: "Data security for cloud based diagnosis"
   
-   CAPL script to create AUTOSAR SecOC Profile1 based secure CAN frames with extended ID using "ccsecurity_libMod.cin" library: 
+   CAPL script to create AUTOSAR SecOC Profile1 based secure CAN frames with extended ID proposed for KUKSA environment using "ccsecurity_libMod.cin" library: 
    
-   Secure CAN frame details:
-  
-      CAN Frame Id = 0x100
-      Authentic i-PDU             = Bits: 0-31  (4 bytes)
-      Truncated Freshness value   = Bits: 32-39 (1 byte)
-      Truncated MAC               = Bits: 40-63 (3 bytes)
+   CAN Frame Details:
+      Can Frame Id: 0x18FF3300
+      Repetition rate: 1 Sec
+      Signal Information:
+      Bits : 0 - 15   : Aftertreatment 1 Intake NOx; Resolution: 0.05 ppm/bit, -200 ppm offset; Data Range: -200 to 3012.75 ppm
+      Bits : 16 - 31 : Aftertreatment 1 Outlet NOx; Resolution: 0.05 ppm/bit, -200 ppm offset; Data Range: -200 to 3012.75 ppm
+      Bits : 32 - 39 : Truncated FV as per Autosar SecOC Profile 1
+      Bits : 40 - 63 : Truncated MAC as per Autosar SecOC Profile 1
+       
+   SecOC Details:
+      Data Id: 0x0001
+      Freshness Value: It shall be an up running counter of size 2 bytes (16 Bits)
+      FVM shall be implemented at Sender (ECU) / Receiver (KUKSA) as per Autosar SecOC FVM example for counter
+      MAC : Shall be calculated as per Autosar standards (NIST SP 800 - 38B)
+
       
       Example of the secure CAN frame: 0x18FF3300 AABBCCDD1025FF46
   
@@ -37,7 +46,7 @@ variables
   // Declare the timer in milliseconds and timer will be reset every 1 sec
   msTimer timerSec;
 
-  // Declare and initialize freshness value (2 bytes)
+  // Declare and initialize freshness value (4 bytes)
   word fv = 0x0000;
   word truncatedFV; 
   
@@ -95,31 +104,40 @@ void createSecureCanFrame(message *msgIdExt)
 */
 byte createMsgMSB1(byte a, byte b, byte c, byte d, word e)
 {
-    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
-    state[0] =a;
+    // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
+    
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
     write("value of:  %x ", a);
-    state[1] =b;
+    state[3] =b;
     write("value of:  %x ", b);
-    state[2] =c;
+    state[4] =c;
     write("value of:  %x ", c);
-    state[3] =d;
+    state[5] =d;
     write("value of:  %x ", d);
     
-    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
     if(e <= 0xFF) 
     {
-        state[4] = 0x00; 
-        write("Value of CFV1:  %x ", state[4]);
-        state[5] =e;
-        write("Value of CFV1 :  %x ", e);
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
     } 
     else 
     {
-        state[4] = swapInt(e); 
-        write("Value of CFV2:  %x ", state[4]);
-        state[5] =e;
-        write("Value of CFV2 :  %x ", state[5]);
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
     }
+
 
     // Calculate MAC value of the base of AES-128 algorithm
     aes_cmac(); 
@@ -136,34 +154,42 @@ byte createMsgMSB1(byte a, byte b, byte c, byte d, word e)
 */
 byte createMsgMSB2(byte a, byte b, byte c, byte d, word e)
 {
-    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
-    state[0] =a;
-    write("value of:  %x ", a);
-    state[1] =b;
-    write("value of:  %x ", b);
-    state[2] =c;
-    write("value of:  %x ", c);
-    state[3] =d;
-    write("value of:  %x", d);
+      // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
     
-    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
+    write("value of:  %x ", a);
+    state[3] =b;
+    write("value of:  %x ", b);
+    state[4] =c;
+    write("value of:  %x ", c);
+    state[5] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
     if(e <= 0xFF) 
     {
-        state[4] = 0x00; 
-        write("Value of CFV1:  %x ", state[4]);
-        state[5] =e;
-        write("Value of CFV1 :  %x ", e);
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
     } 
     else 
     {
-        state[4] = swapInt(e); 
-        write("Value of CFV2:  %x ", state[4]);
-        state[5] =e;
-        write("Value of CFV2 :  %x ", state[5]);
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
     }
-    // Reset the rest of the values 
-    state[6] =0;
-    state[7] =0;
+
+
+    // Calculate MAC value of the base of AES-128 algorithm
     state[8] =0;
     state[9] =0;
     state[10] =0;
@@ -189,30 +215,42 @@ byte createMsgMSB2(byte a, byte b, byte c, byte d, word e)
 byte createMsgMSB3(byte a, byte b, byte c, byte d, word e)
 {
    
-    // Assign the input message intended to transmit to MAC data input (byte positions: 0-4) 
-    state[0] =a;
-    state[1] =b;
-    state[2] =c;
-    state[3] =d;
-  
-    // Assign the complete freshness value to MAC data input (byte positions: 5-6)
+     // Assign  Data ID to input message (byte positions: 0-1) 
+    state[0] =0x00;
+    write("value of:  %x ", state[0]);
+    state[1] =0x01;
+    write("value of:  %x ", state[1]);
+    
+    // Assign data to input message (byte positions: 2-5)
+    state[2] =a;
+    write("value of:  %x ", a);
+    state[3] =b;
+    write("value of:  %x ", b);
+    state[4] =c;
+    write("value of:  %x ", c);
+    state[5] =d;
+    write("value of:  %x ", d);
+    
+    // Assign the complete freshness value to MAC data input (byte positions: 6-7)
     if(e <= 0xFF) 
     {
-        state[4] = 0x00; 
-        write("value of new1:  %x ", state[4]);
-        state[5] =e;
-        write("value of new1 :  %x ", e);
+        state[6] = 0x00; 
+        write("Value of CFV1:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV1 :  %x ", state[7]);
+  
     } 
     else 
     {
-        state[4] = swapInt(e); 
-        write("value of new2:  %x ", state[4]);
-        state[5] =e;
-        write("value of new2 :  %x ", state[5]);
+        state[6] =  swapInt(e); 
+        write("Value of CFV2:  %x ", state[6]);
+        state[7] = e;
+        write("Value of CFV2 :  %x ", state[7]);
+        
     }
-    // Reset the rest of the values 
-    state[6] =0;
-    state[7] =0;
+
+
+    // Calculate MAC value of the base of AES-128 algorithm
     state[8] =0;
     state[9] =0;
     state[10] =0;

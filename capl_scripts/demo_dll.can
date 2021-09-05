@@ -33,15 +33,12 @@ variables
   byte state[16];
   message 0x100 msg2;
 
-  
-  
-  
 
 }
 
 
 
-  // this message handler write specific signal value from frame to a right window
+// this message handler write specific signal value from frame to a right window
   
 void createMessage()
  {
@@ -80,7 +77,7 @@ void createMessage()
 on start
 {
   int i; 
-  write("-------------------Create dummy message -----------------");
+  write("-------------------Create  message -----------------");
   createMessage();
 
   //output(this); 
@@ -96,8 +93,6 @@ on start
       write("0x%x ", DecMac[i]);
   }
   */
-  
-  
   
   
   // in this way it is working fine
@@ -151,36 +146,30 @@ on preStart
 }
 
 
-
-
-
-
-
 on key 'x'
 {
 
-  
-  
 
-  //writeLineEx(1,1,"");
-  //writeLineEx(1,1,"");
-  //writeLineEx(1,1,"");
-  //writeLineEx(1,1,"<7> Calculate the value by the DLL");
-  //writeLineEx(1,1,"    The return value is the result!");
-  //writeLineEx(1,1,"--------------------------------------------------------------");
-  //result = dllAdd(par1, par2);  /* This function will add two values. The return value is the result	*/ 
-  //writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 + 6)  Result = %d",result);
-  //sum(mat2);
-  
-  //result = dllSubtract(par1, par2);  /* This function will substract two values. The return value is the result	*/ 
-  //writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 - 6)  Result = %d",result);
-  
-  //res = dllAES_Init(128);
-  //writeLineEx(1,1,"Call dllAES_init  Result = %d",res);
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"");
+  writeLineEx(1,1,"<7> Calculate the value by the DLL");
+  writeLineEx(1,1,"    The return value is the result!");
+  writeLineEx(1,1,"--------------------------------------------------------------");
+  result = dllAdd(par1, par2);  
   
   
-  //writeLineEx(1,1,"--------------------------------------------------------------"); 
- 
+  writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 + 6)  Result = %d",result);
+  sum(mat2);
+  
+  result = dllSubtract(par1, par2);  /* This function will substract two values. The return value is the result	*/ 
+  writeLineEx(1,1,"Call CAPL DLL Function dllAdd(7 - 6)  Result = %d",result);
+  
+  res = dllAES_Init(128);
+  writeLineEx(1,1,"Call dllAES_init  Result = %d",res);
+  
+  
+  writeLineEx(1,1,"--------------------------------------------------------------"); 
  
   
 }
